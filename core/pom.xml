@@ -380,13 +380,13 @@
             <phase>generate-resources</phase>
             <configuration>
               <!-- Execute the shell script to generate the spark build information. -->
-              <target>
-                <exec executable="bash">
-                  <arg value="${project.basedir}/../build/spark-build-info"/>
-                  <arg value="${project.build.directory}/extra-resources"/>
-                  <arg value="${project.version}"/>
-                </exec>
-              </target>
+<!--              <target>-->
+<!--                <exec executable="bash">-->
+<!--                  <arg value="${project.basedir}/../build/spark-build-info"/>-->
+<!--                  <arg value="${project.build.directory}/extra-resources"/>-->
+<!--                  <arg value="${project.version}"/>-->
+<!--                </exec>-->
+<!--              </target>-->
             </configuration>
             <goals>
               <goal>run</goal>

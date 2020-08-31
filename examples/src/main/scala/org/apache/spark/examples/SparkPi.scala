@@ -25,6 +25,9 @@ import org.apache.spark.sql.SparkSession
 /** Computes an approximation to pi */
 object SparkPi {
   def main(args: Array[String]) {
+    System.setProperty("hadoop.home.dir", "C:\\winutils")
+    System.setProperty("spark.local.dir", "F:\\tmp\\")
+    System.setProperty("spark.master", "local")
     val spark = SparkSession
       .builder
       .appName("Spark Pi")
@@ -34,10 +37,11 @@ object SparkPi {
     val count = spark.sparkContext.parallelize(1 until n, slices).map { i =>
       val x = random * 2 - 1
       val y = random * 2 - 1
-      if (x*x + y*y <= 1) 1 else 0
+      if (x * x + y * y <= 1) 1 else 0
     }.reduce(_ + _)
     println("Pi is roughly " + 4.0 * count / (n - 1))
     spark.stop()
   }
 }
+
 // scalastyle:on println
