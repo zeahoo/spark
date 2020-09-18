@@ -80,7 +80,7 @@ class ExternalAppendOnlyMap[K, V, C](
       blockManager: BlockManager) {
     this(createCombiner, mergeValue, mergeCombiners, serializer, blockManager, TaskContext.get())
   }
-
+  // 可以追踪内存大小的appendOnlyMap实现
   @volatile private var currentMap = new SizeTrackingAppendOnlyMap[K, C]
   private val spilledMaps = new ArrayBuffer[DiskMapIterator]
   private val sparkConf = SparkEnv.get.conf
@@ -88,7 +88,7 @@ class ExternalAppendOnlyMap[K, V, C](
 
   /**
    * Size of object batches when reading/writing from serializers.
-   *
+   * 批量大小
    * Objects are written in batches, with each batch using its own serialization stream. This
    * cuts down on the size of reference-tracking maps constructed when deserializing a stream.
    *
@@ -109,6 +109,7 @@ class ExternalAppendOnlyMap[K, V, C](
   private val writeMetrics: ShuffleWriteMetrics = new ShuffleWriteMetrics()
 
   // Peak size of the in-memory map observed so far, in bytes
+  // 目前为止map所保留的峰值内存大小
   private var _peakMemoryUsedBytes: Long = 0L
   def peakMemoryUsedBytes: Long = _peakMemoryUsedBytes
 
@@ -132,11 +133,11 @@ class ExternalAppendOnlyMap[K, V, C](
 
   /**
    * Insert the given iterator of keys and values into the map.
-   *
+   * 插入给定的<K,V>到map中
    * When the underlying map needs to grow, check if the global pool of shuffle memory has
    * enough room for this to happen. If so, allocate the memory required to grow the map;
    * otherwise, spill the in-memory map to disk.
-   *
+   * 如果map需要扩容，检查全局的shuffle内存池是否有足够的空间来扩容，如果可以，则扩容，否则，保存到磁盘
    * The shuffle memory usage of the first trackMemoryThreshold entries is not tracked.
    */
   def insertAll(entries: Iterator[Product2[K, V]]): Unit = {
@@ -158,6 +159,7 @@ class ExternalAppendOnlyMap[K, V, C](
         _peakMemoryUsedBytes = estimatedSize
       }
       if (maybeSpill(currentMap, estimatedSize)) {
+        // 重置
         currentMap = new SizeTrackingAppendOnlyMap[K, C]
       }
       currentMap.changeValue(curEntry._1, update)
@@ -182,7 +184,9 @@ class ExternalAppendOnlyMap[K, V, C](
    * Sort the existing contents of the in-memory map and spill them to a temporary file on disk.
    */
   override protected[this] def spill(collection: SizeTracker): Unit = {
+    // 获取排序结果
     val inMemoryIterator = currentMap.destructiveSortedIterator(keyComparator)
+    // 保存临时文件
     val diskMapIterator = spillMemoryIteratorToDisk(inMemoryIterator)
     spilledMaps += diskMapIterator
   }
@@ -209,9 +213,11 @@ class ExternalAppendOnlyMap[K, V, C](
 
   /**
    * Spill the in-memory Iterator to a temporary file on disk.
+   * 将内存中的迭代器集合保存到磁盘的临时文件中
    */
   private[this] def spillMemoryIteratorToDisk(inMemoryIterator: Iterator[(K, C)])
       : DiskMapIterator = {
+    // 创建临时的本地block
     val (blockId, file) = diskBlockManager.createTempLocalBlock()
     val writer = blockManager.getDiskWriter(blockId, file, ser, fileBufferSize, writeMetrics)
     var objectsWritten = 0
@@ -233,7 +239,7 @@ class ExternalAppendOnlyMap[K, V, C](
         val kv = inMemoryIterator.next()
         writer.write(kv._1, kv._2)
         objectsWritten += 1
-
+        // 计数达到，flush到磁盘
         if (objectsWritten == serializerBatchSize) {
           flush()
         }

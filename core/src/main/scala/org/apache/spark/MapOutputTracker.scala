@@ -459,6 +459,9 @@ private[spark] class MapOutputTrackerMaster(
    * Return the preferred hosts on which to run the given map output partition in a given shuffle,
    * i.e. the nodes that the most outputs for that partition are on.
    *
+   * 给定 stageId，可以获取该 stage 中 ShuffleMapTasks 生成的 FileSegments 信息 Array[MapStatus]，
+   * 通过 Array(taskId) 就可以得到某个 task 输出的 FileSegments 位置（blockManagerId）及每个 FileSegment 大小。
+   *
    * @param dep shuffle dependency object
    * @param partitionId map output partition that we want to read
    * @return a sequence of host names

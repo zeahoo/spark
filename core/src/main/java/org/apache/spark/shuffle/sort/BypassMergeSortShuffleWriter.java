@@ -64,7 +64,8 @@ import org.apache.spark.util.Utils;
  *    <li>the number of partitions is less than
  *      <code>spark.shuffle.sort.bypassMergeThreshold</code>.</li>
  * </ul>
- *
+ * map端不需要排序、不需要聚合、分区个数较少（少于spark.shuffle.sort.bypassMergeThreshold 默认200）
+ * groupByKey(100), partitionBy(100), sortByKey(100)
  * This code used to be part of {@link org.apache.spark.util.collection.ExternalSorter} but was
  * refactored into its own class in order to reduce code complexity; see SPARK-7855 for details.
  * <p>

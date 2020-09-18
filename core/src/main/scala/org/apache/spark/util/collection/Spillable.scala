@@ -73,7 +73,7 @@ private[spark] abstract class Spillable[C](taskMemoryManager: TaskMemoryManager)
   /**
    * Spills the current in-memory collection to disk if needed. Attempts to acquire more
    * memory before spilling.
-   *
+   * 如果需要，将内存的集合保存到磁盘，在保存到磁盘前尝试去获得更多的内存
    * @param collection collection to spill to disk
    * @param currentMemory estimated size of the collection in bytes
    * @return true if `collection` was spilled to disk; false otherwise
@@ -89,14 +89,20 @@ private[spark] abstract class Spillable[C](taskMemoryManager: TaskMemoryManager)
       // or we already had more memory than myMemoryThreshold), spill the current collection
       shouldSpill = currentMemory >= myMemoryThreshold
     }
+    // 如果内存不足或者元素个数达到保存的阈值
     shouldSpill = shouldSpill || _elementsRead > numElementsForceSpillThreshold
     // Actually spill
     if (shouldSpill) {
+      // spill +1
       _spillCount += 1
       logSpillage(currentMemory)
+      // spill 操作
       spill(collection)
+      // 清零
       _elementsRead = 0
+      // 内存量收回
       _memoryBytesSpilled += currentMemory
+      // 释放内存
       releaseMemory()
     }
     shouldSpill

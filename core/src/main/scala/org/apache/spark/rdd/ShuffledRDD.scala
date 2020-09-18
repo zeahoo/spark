@@ -94,6 +94,7 @@ class ShuffledRDD[K: ClassTag, V: ClassTag, C: ClassTag](
   }
 
   override protected def getPreferredLocations(partition: Partition): Seq[String] = {
+    // 获取tracker，定位上一个result的位置
     val tracker = SparkEnv.get.mapOutputTracker.asInstanceOf[MapOutputTrackerMaster]
     val dep = dependencies.head.asInstanceOf[ShuffleDependency[K, V, C]]
     tracker.getPreferredLocationsForShuffle(dep, partition.index)

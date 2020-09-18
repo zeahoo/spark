@@ -256,6 +256,7 @@ class AppendOnlyMap[K, V](initialCapacity: Int = 64)
   /**
    * Return an iterator of the map in sorted order. This provides a way to sort the map without
    * using additional memory, at the expense of destroying the validity of the map.
+   * 按排序顺序返回map的集合。这提供了一种不使用额外内存的排序方式，但破坏map的寻址方法。
    */
   def destructiveSortedIterator(keyComparator: Comparator[K]): Iterator[(K, V)] = {
     destroyed = true

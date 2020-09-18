@@ -50,7 +50,8 @@ private[spark] class DiskBlockManager(conf: SparkConf, deleteFilesOnStop: Boolea
 
   private val shutdownHook = addShutdownHook()
 
-  /** Looks up a file by hashing it into one of our local subdirectories. */
+  /** Looks up a file by hashing it into one of our local subdirectories.
+      根据hash文件名的值查找本地其中之一的子目录 */
   // This method should be kept in sync with
   // org.apache.spark.network.shuffle.ExternalShuffleBlockResolver#getFile().
   def getFile(filename: String): File = {
@@ -115,6 +116,7 @@ private[spark] class DiskBlockManager(conf: SparkConf, deleteFilesOnStop: Boolea
   /** Produces a unique block id and File suitable for storing local intermediate results. */
   def createTempLocalBlock(): (TempLocalBlockId, File) = {
     var blockId = new TempLocalBlockId(UUID.randomUUID())
+    // 获取文件
     while (getFile(blockId).exists()) {
       blockId = new TempLocalBlockId(UUID.randomUUID())
     }
